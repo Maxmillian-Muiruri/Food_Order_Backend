@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { CreateVandorInput } from "../dto";
 import { Vandor } from "../models";
+import { GenerateSalt, GeneratePassword } from "../utility";
 
 export const CreateVandor = async (
   req: Request,
@@ -18,14 +19,25 @@ export const CreateVandor = async (
     phone,
   } = <CreateVandorInput>req.body;
 
+  const existingVandor = await Vandor.findOne({ email: email });
+
+  if (existingVandor !== null) {
+    return res.json({ message: "A vandor is exist with this email ID" });
+  }
+
+  //generate a salt
+
+  const salt = await GenerateSalt();
+  const userPassword = await GeneratePassword(password, salt);
+
   const createdVandor = await Vandor.create({
     name: name,
     address: address,
     pincode: pincode,
     foodType: foodType,
     email: email,
-    password: password,
-    salt: "",
+    password: userPassword,
+    salt: salt,
     ownerName: ownerName,
     phone: phone,
     rating: 0,
@@ -35,23 +47,21 @@ export const CreateVandor = async (
     lng: 0,
   });
 
-  return res.json({
-    name,
-    address,
-    pincode,
-    foodType,
-    email,
-    password,
-    ownerName,
-    phone,
-  });
+  return res.json(createdVandor);
 };
 
-export const Get = async (
+export const GetVanndors = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {};
+) => {
+  const vandors = await Vandor.find();
+  if (vandors !== null) {
+    return res.json(vandors);
+  }
+  return res.json({ message: "Vendors data not available" });
+};
+
 export const GetVandorByID = async (
   req: Request,
   res: Response,

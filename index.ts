@@ -1,8 +1,11 @@
 import express from "express";
 import bodyParser from "body-parser";
-
 import mongoose from "mongoose";
-import { AdminRoute, VandorRoute } from "./routes";
+import { AdminRoute } from "./routes/AdminRoute";
+
+import { VandorRoute } from "./routes/vandorRoute";
+
+import { MONGO_URI } from "./config";
 
 const app = express();
 
@@ -13,6 +16,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Define routes
 app.use("/admin", AdminRoute);
 app.use("/vandor", VandorRoute);
+
+// Connect to MongoDB
+mongoose
+  .connect(MONGO_URI)
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((err) => {
+    console.error("Failed to connect to MongoDB:", err);
+  });
 
 // Start server
 app.listen(8000, () => {
