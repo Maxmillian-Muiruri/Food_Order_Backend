@@ -48,9 +48,9 @@ export const CustomerSignUp = async (
 
   const existingCustomer = await Customer.find({ email: email });
 
-   if (existingCustomer !== null) {
-       return res.status(400).json({ message: "Email already exist!" });
-    }
+  //   if (existingCustomer !== null) {
+  //     return res.status(400).json({ message: "Email already exist!" });
+  //   }
 
   const result = await Customer.create({
     email: email,
@@ -143,21 +143,22 @@ export const CustomerVerify = async (
     const profile = await Customer.findById(customer._id);
     console.log(profile);
     if (profile) {
-        if (profile.otp === parseInt(otp) && profile.otp_expiry >= new Date()) {
-            profile.verified = true;
+      if (profile.otp === parseInt(otp) && profile.otp_expiry >= new Date()) {
+        profile.verified = true;
 
-            const updatedCustomerResponse = await profile.save();
-            const signature = GenerateSignature({
-                _id: String(updatedCustomerResponse._id),
-                email: updatedCustomerResponse.email,
-                verified: updatedCustomerResponse.verified,
-            });
+        const updatedCustomerResponse = await profile.save();
 
-            return res.status(200).json({
-                signature,
-                email: updatedCustomerResponse.email,
-                verified: updatedCustomerResponse.verified,
-            });
+        const signature = GenerateSignature({
+          _id: String(updatedCustomerResponse._id),
+          email: updatedCustomerResponse.email,
+          verified: updatedCustomerResponse.verified,
+        });
+
+        return res.status(200).json({
+          signature,
+          email: updatedCustomerResponse.email,
+          verified: updatedCustomerResponse.verified,
+        });
       }
     }
   }
@@ -266,11 +267,10 @@ export const CreatePayment = async (
 
   if (offerId) {
     const appliedOffer = await Offer.findById(offerId);
-    if (appliedOffer && appliedOffer.isActive) {
-        payableAmount = payableAmount - appliedOffer.offerAmount;
-    }
-}
 
+    if (appliedOffer.isActive) {
+      payableAmount = payableAmount - appliedOffer.offerAmount;
+    }
   }
   // perform payment gateway charge api
 
