@@ -1,1 +1,4 @@
-export * from "./vandor.dto";
+export * from './Vandor.dto';
+export * from './Auth.dto';
+export * from './Food.dto';
+export * from './Customer.dto';
